@@ -9,7 +9,7 @@
 import UIKit
 import AVFoundation
 
-class RecordSoundsViewController: UIViewController {
+class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
 
     var audioRecorder: AVAudioRecorder!
     
@@ -27,6 +27,8 @@ class RecordSoundsViewController: UIViewController {
         print("viewWillappear")
     }
 
+    // MARK : actions
+    
     // Start Recording...
     @IBAction func recordAudio(_ sender: Any) {
         recordingLabel.text = "Recording In Progress"
@@ -37,12 +39,12 @@ class RecordSoundsViewController: UIViewController {
         let recordingName = "recordedVoice.wav"
         let pathArray = [dirPath, recordingName]
         let filePath = URL(string: pathArray.joined(separator: "/"))
-        print(filePath as Any)
     
         let session = AVAudioSession.sharedInstance()
         try! session.setCategory(AVAudioSessionCategoryPlayAndRecord, with:AVAudioSessionCategoryOptions.defaultToSpeaker)
         
         try! audioRecorder = AVAudioRecorder(url: filePath!, settings: [:])
+        audioRecorder.delegate = self
         audioRecorder.isMeteringEnabled = true
         audioRecorder.prepareToRecord()
         audioRecorder.record()
@@ -59,6 +61,16 @@ class RecordSoundsViewController: UIViewController {
         try! audioSession.setActive(false)
     }
     
-
+    // MARK : delegates
+    
+    // gives url of recorded audio file to the next view controller
+    func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
+        if flag {
+            performSegue(withIdentifier: "stopRecording", sender: audioRecorder.url)
+        } else {
+            print("recording was not successful")
+        }
+    }
+    
 }
 
